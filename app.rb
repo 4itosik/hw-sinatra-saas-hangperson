@@ -1,9 +1,10 @@
 require 'sinatra/base'
 require 'sinatra/flash'
 require './lib/hangperson_game.rb'
+require 'pry'
 
 class HangpersonApp < Sinatra::Base
-
+  
   enable :sessions
   register Sinatra::Flash
   
@@ -31,6 +32,10 @@ class HangpersonApp < Sinatra::Base
     # NOTE: don't change previous line - it's needed by autograder!
 
     @game = HangpersonGame.new(word)
+    session[:word] = word
+    session[:guesses] = ''
+    session[:wrong_guesses] = ''
+    binding.pry
     redirect '/show'
   end
   
@@ -40,6 +45,22 @@ class HangpersonApp < Sinatra::Base
   post '/guess' do
     letter = params[:guess].to_s[0]
     ### YOUR CODE HERE ###
+    @game.word = @@word
+    #@game.word = session[:word] if !@game.word || @game.word == ''
+    @game.guesses = session[:guesses]
+    @game.wrong_guesses = session[:wrong_guesses]
+    begin
+      result = @game.guess(letter)
+      if result == false
+        flash[:message] = "You have already used that letter."
+      else
+        flash[:message] = ""
+        session[:guesses] = @game.guesses
+        session[:wrong_guesses] = @game.wrong_guesses
+      end
+    rescue
+      flash[:message] = "Invalid guess."
+    end
     redirect '/show'
   end
   
@@ -49,18 +70,27 @@ class HangpersonApp < Sinatra::Base
   # Notice that the show.erb template expects to use the instance variables
   # wrong_guesses and word_with_guesses from @game.
   get '/show' do
-    ### YOUR CODE HERE ###
+    @game.word = session[:word]
+    @game.guesses = session[:guesses]
+    @game.wrong_guesses = session[:wrong_guesses]
+    redirect "/#{@game.check_win_or_lose.to_s}" if @game.check_win_or_lose != :play
     erb :show # You may change/remove this line
   end
   
   get '/win' do
-    ### YOUR CODE HERE ###
     erb :win # You may change/remove this line
   end
   
   get '/lose' do
-    ### YOUR CODE HERE ###
     erb :lose # You may change/remove this line
   end
   
+  
+  def word_with_guesses(word, guesses)
+    result = word
+    word.chars do |char|
+      result.gsub!(char, '-') unless guesses.include?(char)
+    end
+    result
+  end
 end
