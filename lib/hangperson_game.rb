@@ -27,20 +27,21 @@ class HangpersonGame
   end
 
   def word_with_guesses
-    result = word
-    word.chars do |char|
-      result.gsub!(char, '-') unless guesses.include?(char)
+    return '' unless word
+    result = ''
+    word.each_char do |char|
+      result += guesses.include?(char) ? char : '-'
     end
     result
   end
 
   def check_win_or_lose
-    return :lose if wrong_guesses.length >= 7
+    return :lose if wrong_guesses && wrong_guesses.length >= 7
     uniq_char = word[0]
-    word.chars do |char|
+    word.each_char do |char|
       uniq_char << char unless uniq_char.include?(char)
     end
-    return :win if uniq_char.length == guesses.length
+    return :win if guesses && uniq_char.length == guesses.length
     :play
   end
   

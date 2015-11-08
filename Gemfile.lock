@@ -135,6 +135,3 @@ DEPENDENCIES
   sinatra (>= 1.4)
   sinatra-flash (= 0.3.0)
   webmock (= 1.21.0)
-
-BUNDLED WITH
-   1.10.6

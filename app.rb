@@ -35,7 +35,7 @@ class HangpersonApp < Sinatra::Base
     session[:word] = word
     session[:guesses] = ''
     session[:wrong_guesses] = ''
-    binding.pry
+
     redirect '/show'
   end
   
@@ -45,8 +45,8 @@ class HangpersonApp < Sinatra::Base
   post '/guess' do
     letter = params[:guess].to_s[0]
     ### YOUR CODE HERE ###
-    @game.word = @@word
-    #@game.word = session[:word] if !@game.word || @game.word == ''
+
+    @game.word = session[:word] if @game.word == ''
     @game.guesses = session[:guesses]
     @game.wrong_guesses = session[:wrong_guesses]
     begin
@@ -70,10 +70,11 @@ class HangpersonApp < Sinatra::Base
   # Notice that the show.erb template expects to use the instance variables
   # wrong_guesses and word_with_guesses from @game.
   get '/show' do
-    @game.word = session[:word]
+    @game.word = session[:word] if @game.word == ''
     @game.guesses = session[:guesses]
     @game.wrong_guesses = session[:wrong_guesses]
-    redirect "/#{@game.check_win_or_lose.to_s}" if @game.check_win_or_lose != :play
+
+    redirect "/#{@game.check_win_or_lose.to_s}" if @game.word && @game.check_win_or_lose != :play
     erb :show # You may change/remove this line
   end
   
